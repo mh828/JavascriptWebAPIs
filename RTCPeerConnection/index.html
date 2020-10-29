@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<input type="button" value="start local peer" onclick="startLocalPeer()"/>
+
+<input type="text" id="message-box">
+<input type="button" value="send" id="sendMessage"/>
+
+<script>
+
+    function startLocalPeer() {
+        const configuration = {
+            'iceServers': [
+                {
+                    urls: "stun:numb.viagenie.ca:3478",
+                    username: "poiesh@ymail.com",
+                    credential: "005713"
+                },
+                {
+                    urls: "turn:numb.viagenie.ca:3478",
+                    username: "poiesh@ymail.com",
+                    credential: "005713"
+                }
+            ]
+        };
+
+        const localPeer = new RTCPeerConnection(configuration);
+        const sendChannel = localPeer.createDataChannel('sendChannel');
+        const sendChannelStatusChanged = (e) => {
+            console.log('Send Channel (local peer) status is :' + sendChannel.readyState)
+            if (sendChannel.readyState === 'open')
+                alert('start to messaging');
+        }
+        sendChannel.onopen = sendChannelStatusChanged;
+        sendChannel.onclose = sendChannelStatusChanged;
+
+        const remotePeer = new RTCPeerConnection(configuration);
+        remotePeer.ondatachannel = e => {
+            e.channel.onmessage = m => {
+                console.log(`Received Message From Caller:\t\t ${m.data}`);
+            };
+
+            const receiveStatusChanged = (ev) => {
+                console.log('Receive Channel (Remote peer) status is :' + sendChannel.readyState)
+            }
+            e.channel.onopen = receiveStatusChanged;
+            e.channel.onclose = receiveStatusChanged;
+        }
+
+
+        localPeer.onicecandidate = (e) => {
+            remotePeer.addIceCandidate(e.candidate)
+        }
+
+        remotePeer.onicecandidate = e => {
+            localPeer.addIceCandidate(e.candidate);
+        }
+
+
+        localPeer.createOffer()
+            .then(offer => {
+                console.log(offer);
+                return localPeer.setLocalDescription(offer);
+            })
+            .then(() => remotePeer.setRemoteDescription(localPeer.localDescription))
+            .then(() => remotePeer.createAnswer())
+            .then(answer => remotePeer.setLocalDescription(answer))
+            .then(() => localPeer.setRemoteDescription(remotePeer.localDescription))
+            .catch(() => {
+                console.log('error on call')
+            })
+    }
+
+
+</script>
+
+</body>
+</html>
