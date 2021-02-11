@@ -10,9 +10,20 @@
 <script>
     if ('serviceWorker' in navigator) {
         window.navigator.serviceWorker.register('/serviceWorker.js').then(function (r) {
-            console.log(r);
-            return navigator.serviceWorker.ready;
 
+
+        });
+
+        navigator.serviceWorker.addEventListener('message', function (message) {
+            console.log(message.data)
+        })
+
+
+        navigator.serviceWorker.ready.then(r => {
+            console.log(r)
+            setInterval(function () {
+                r.active.postMessage('my message' + Date.now());
+            }, 1000)
         });
     }
 </script>
