@@ -11,6 +11,16 @@
 
 <script>
     const ws = new WebSocket('ws://127.0.0.1:1223');
+    ws.addEventListener('open', function () {
+        console.log('server opened');
+        setInterval(() => {
+            console.log(ws.send("some message to server"));
+        }, 1000)
+
+    })
+    ws.addEventListener('message', function (e) {
+        console.log(e.data);
+    })
 </script>
 </body>
 </html>
