@@ -60,7 +60,9 @@ function GenerateResponse($secWebsocketKey): string
 
 function DecodePayloadLength($input)
 {
+    $masking_key = null;
     $binary = decbin(ord($input[1]));
+    $last_read_byte = 1;
     $mask = bindec($binary[0]);
     $binary = substr($binary, 1);
     $length = bindec($binary);
@@ -70,6 +72,7 @@ function DecodePayloadLength($input)
         return $length;
     if ($length === 126) {
         $binary = decbin(ord($input[2])) . decbin(ord($input[3]));
+        $last_read_byte = 3;
         $length = bindec($binary);
     }
     if ($length === 127) {
@@ -81,12 +84,30 @@ function DecodePayloadLength($input)
             decbin(ord($input[7])) .
             decbin(ord($input[8])) .
             decbin(ord($input[9]));
+        $last_read_byte = 9;
         $length = bindec($binary);
+    }
+
+
+    if ($mask) {//read masking key
+        $masking_key = $input[$last_read_byte + 1] .
+            $input[$last_read_byte + 2] .
+            $input[$last_read_byte + 3] .
+            $input[$last_read_byte + 4];
+        $last_read_byte += 4;
+
+    }
+
+    $payloadData = '';
+    for ($i = $last_read_byte; $i < strlen($input); $i++) {
+        $payloadData .= $input[$i] ^ $masking_key[$i % 4];
     }
 
 
     return [
         'mask' => boolval($mask),
-        'length' => $length
+        'length' => $length,
+        'masking_key' => $masking_key,
+        'payload' => $payloadData
     ];
 }

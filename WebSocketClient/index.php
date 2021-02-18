@@ -18,7 +18,7 @@
 
         const message = "some message to server adf asf asf af af asdsa dfsad fsdf sdf sfsaf sad sd sd sdf sd sad sf" +
             "sd fsd sdf sdf sdf sadf saf" +
-            " sdfsdf safs affafad fasfd";
+            " sdfsdf safs affafad fasfd" + "\n End of Message";
         console.log(message.length)
         ws.send(message);
 
