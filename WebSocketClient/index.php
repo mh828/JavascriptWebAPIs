@@ -9,18 +9,35 @@
 </head>
 <body>
 
+<input type="file" onchange="changedFile(this.files)"/>
+
 <script>
     const ws = new WebSocket('ws://127.0.0.1:1223');
     ws.addEventListener('open', function () {
         console.log('server opened');
-        setInterval(() => {
-            console.log(ws.send("some message to server"));
-        }, 1000)
+
+        const message = "some message to server adf asf asf af af asdsa dfsad fsdf sdf sfsaf sad sd sd sdf sd sad sf" +
+            "sd fsd sdf sdf sdf sadf saf" +
+            " sdfsdf safs affafad fasfd";
+        console.log(message.length)
+        ws.send(message);
 
     })
     ws.addEventListener('message', function (e) {
         console.log(e.data);
     })
+
+    function changedFile(files) {
+        if (files.length === 0)
+            return;
+
+        const fd = new FileReader();
+        fd.addEventListener('load', () => {
+            console.log(fd.result.length)
+            ws.send(fd.result);
+        })
+        fd.readAsText(files[0]);
+    }
 </script>
 </body>
 </html>

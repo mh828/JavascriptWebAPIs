@@ -17,9 +17,14 @@ while (true) {
         socket_write($newc, GenerateResponse($secWebSocketKey));
         socket_set_block($newc);
 
-        $data = "";
-        while ($input = socket_read($newc, 512)) {
-            var_dump(strlen($input));
+        while (true) {
+            $data = "";
+            while ($input = socket_read($newc, 512)) {
+                socket_set_nonblock($newc);
+                $data .= $input;
+            }
+            socket_set_block($newc);
+            var_dump(DecodePayloadLength($data));
         }
 
     }
@@ -41,7 +46,7 @@ function GenerateAcceptHeader($secWebsocketKey): string
     return base64_encode(sha1($secWebsocketKey . MAGIC_STRING, true));
 }
 
-function GenerateResponse($secWebsocketKey)
+function GenerateResponse($secWebsocketKey): string
 {
     $acceptKey = GenerateAcceptHeader($secWebsocketKey);
     $response = "HTTP/1.1 101 Switching Protocols\r\n";
@@ -51,4 +56,37 @@ function GenerateResponse($secWebsocketKey)
     $response .= "\r\n";
 
     return $response;
+}
+
+function DecodePayloadLength($input)
+{
+    $binary = decbin(ord($input[1]));
+    $mask = bindec($binary[0]);
+    $binary = substr($binary, 1);
+    $length = bindec($binary);
+
+
+    if ($length < 126)
+        return $length;
+    if ($length === 126) {
+        $binary = decbin(ord($input[2])) . decbin(ord($input[3]));
+        $length = bindec($binary);
+    }
+    if ($length === 127) {
+        $binary = decbin(ord($input[2])) .
+            decbin(ord($input[3])) .
+            decbin(ord($input[4])) .
+            decbin(ord($input[5])) .
+            decbin(ord($input[6])) .
+            decbin(ord($input[7])) .
+            decbin(ord($input[8])) .
+            decbin(ord($input[9]));
+        $length = bindec($binary);
+    }
+
+
+    return [
+        'mask' => boolval($mask),
+        'length' => $length
+    ];
 }
