@@ -11,8 +11,10 @@
 
 <input type="file" onchange="changedFile(this.files)"/>
 
+<input type="button" onclick="sendTestMessage()" value="send Message"/>
+
 <script>
-    const ws = new WebSocket('ws://127.0.0.1:1223');
+    const ws = new WebSocket('ws://2.tcp.ngrok.io:18330');
     ws.addEventListener('open', function () {
         console.log('server opened');
 
@@ -24,8 +26,13 @@
 
     })
     ws.addEventListener('message', function (e) {
-        console.log(e.data);
+        console.log(e);
+        console.log(e.data.length);
     })
+
+    function closeSocket() {
+        ws.close();
+    }
 
     function changedFile(files) {
         if (files.length === 0)
@@ -37,6 +44,14 @@
             ws.send(fd.result);
         })
         fd.readAsText(files[0]);
+    }
+
+    function sendTestMessage() {
+        const message = "some message to server adf asf asf af af asdsa dfsad fsdf sdf sfsaf sad sd sd sdf sd sad sf" +
+            "sd fsd sdf sdf sdf sadf saf" +
+            " sdfsdf safs affafad fasfd" + "\n End of Message";
+        //ws.send(message);
+        ws.send("----test message");
     }
 </script>
 </body>
