@@ -12,23 +12,31 @@
 <input type="file" onchange="changedFile(this.files)"/>
 
 <input type="button" onclick="sendTestMessage()" value="send Message"/>
+<input type="button" onclick="closeSocket()" value="close connection"/>
+<input type="button" onclick="connectToSocket()" value="connect connection"/>
 
 <script>
-    const ws = new WebSocket('ws://2.tcp.ngrok.io:18330');
-    ws.addEventListener('open', function () {
-        console.log('server opened');
+    var ws = null;
+    connectToSocket();
 
-        const message = "some message to server adf asf asf af af asdsa dfsad fsdf sdf sfsaf sad sd sd sdf sd sad sf" +
-            "sd fsd sdf sdf sdf sadf saf" +
-            " sdfsdf safs affafad fasfd" + "\n End of Message";
-        console.log(message.length)
-        ws.send(message);
+    function connectToSocket() {
+        //const ws = new WebSocket('ws://2.tcp.ngrok.io:18330');
+        ws = new WebSocket('ws://127.0.0.1:1223');
+        ws.addEventListener('open', function () {
+            console.log('server opened');
 
-    })
-    ws.addEventListener('message', function (e) {
-        console.log(e);
-        console.log(e.data.length);
-    })
+            const message = "some message to server adf asf asf af af asdsa dfsad fsdf sdf sfsaf sad sd sd sdf sd sad sf" +
+                "sd fsd sdf sdf sdf sadf saf" +
+                " sdfsdf safs affafad fasfd" + "\n End of Message";
+            console.log(message.length)
+            ws.send(message);
+
+        })
+        ws.addEventListener('message', function (e) {
+            console.log(e);
+            console.log(e.data.length);
+        });
+    }
 
     function closeSocket() {
         ws.close();

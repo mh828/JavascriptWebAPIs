@@ -33,6 +33,13 @@ function startServer()
 
                 socket_set_block($newc);
                 $receivedMessage = ClientMessage::DecodeClientMessage($data);
+
+                //close handshake check
+                if ($receivedMessage->getOpcode() === '1000') {
+                    //close handshake
+                    socket_write($newc, $data);
+                }
+
                 socket_write($newc, sendMessage($receivedMessage->getPayload(), false));
                 /*if (!@socket_write($newc, sendMessage(file_get_contents('bridges.txt'), false)))
                     break;//broken socket*/
@@ -113,6 +120,11 @@ function sendMessage($message, $mask = true): string
 
 class ClientMessage
 {
+    private $fin;
+    private $rsv1;
+    private $rsv2;
+    private $rsv3;
+    private $opcode;
     private $mask;
     private $length;
     private $payload;
@@ -120,7 +132,12 @@ class ClientMessage
 
     public function DecodeMessage($input)
     {
-        var_dump(strlen($input) . " ---- " . decbin(ord($input[0])));
+        $binary = decbin(ord($input[0]));
+        $this->fin = $binary[0];
+        $this->rsv1 = $binary[1];
+        $this->rsv2 = $binary[2];
+        $this->rsv3 = $binary[3];
+        $this->opcode = substr($binary, 4);
 
         $masking_key = null;
         $binary = decbin(ord($input[1]));
@@ -181,36 +198,49 @@ class ClientMessage
 
     //<editor-fold desc="Getters">
 
-    /**
-     * @return mixed
-     */
     public function getMask()
     {
         return $this->mask;
     }
 
-    /**
-     * @return mixed
-     */
     public function getPayload()
     {
         return $this->payload;
     }
 
-    /**
-     * @return mixed
-     */
     public function getLength()
     {
         return $this->length;
     }
 
-    /**
-     * @return mixed
-     */
     public function getMaskingKey()
     {
         return $this->masking_key;
+    }
+
+    public function getFin()
+    {
+        return $this->fin;
+    }
+
+    public function getRsv1()
+    {
+        return $this->rsv1;
+    }
+
+    public function getRsv2()
+    {
+        return $this->rsv2;
+    }
+
+    public function getRsv3()
+    {
+        return $this->rsv3;
+    }
+
+    public function getOpcode()
+    {
+        return $this->opcode;
     }
 
     //</editor-fold>
