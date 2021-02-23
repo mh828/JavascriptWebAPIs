@@ -12,6 +12,10 @@ if (file_exists('endpoint.json')) {
     $details = openssl_pkey_get_details($privateKey);
     $pk = '';
     openssl_pkey_export($privateKey, $pk, null, $config);
-    var_dump($pk);
     $publicKey = $details['key'];
+
+
+    $pk = 'BH-03vhKF0zOCDogSUlIh_egzwRTdbybp3aqIqNKlQKFV-q8f5bCCecXvEzsDrDKeI1akgUY_84lPckYB8iazwQ';
+    var_dump(openssl_dh_compute_key(base64_decode($pk),$privateKey));
+
 }

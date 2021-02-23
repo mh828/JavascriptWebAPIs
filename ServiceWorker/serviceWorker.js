@@ -20,11 +20,15 @@ self.addEventListener('message', function (message) {
 
 self.addEventListener('push', function (event) {
 
-    const textData = event.data.text();
     self.clients.matchAll().then(r => {
         r.forEach((cl) => {
-            cl.postMessage(textData)
+            if (cl.type === 'window') {
+                //cl.postMessage(textData)
+                cl.postMessage('message notification received')
+            }
         })
     })
+
+    const textData = event.data.text();
     self.registration.showNotification(textData);
 });
