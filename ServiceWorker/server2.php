@@ -1,5 +1,5 @@
 <?php
-
+include 'functions.php';
 
 if (file_exists('endpoint.json')) {
     header('Content-Type: application/json; charset=utf-8');
@@ -8,11 +8,9 @@ if (file_exists('endpoint.json')) {
 
     $key = $content->keys->p256dh;
     $cipher_algo = "aes-128-gcm";
-    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($cipher_algo));
-    $tag = "";
-    $val = openssl_encrypt("some data must be enctrypted", $cipher_algo, $key, 0, $iv, $tag, "tag");
-
-    $dval = (openssl_decrypt($val, $cipher_algo, $key, 0, $iv, $tag, 'tag'));
+    $payload = "some data must send to client";
+    $sk = \functions\getKeys();
+    openssl_private_encrypt($payload, $dataEcrypted, $sk->private_key);
 
 
     $c = curl_init($content->endpoint);
@@ -23,9 +21,10 @@ if (file_exists('endpoint.json')) {
         CURLOPT_HTTPHEADER => [
             'TTL: 60',
             'Content-Encoding: aes128gcm',
-            'Content-Length: ' . strlen($val)
+            'Content-Length: ' . strlen($dataEcrypted),
+            //'Crypto-Key: ' . \functions\base64url_encode($sk->public_key)
         ],
-        CURLOPT_POSTFIELDS => $val
+        CURLOPT_POSTFIELDS => $dataEcrypted
     ]);
 
     $result = curl_exec($c);
