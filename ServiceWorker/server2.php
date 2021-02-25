@@ -23,7 +23,7 @@ if (file_exists('endpoint.json')) {
         CURLOPT_HTTPHEADER => [
             'TTL: 60',
             'Content-Encoding: aes128gcm',
-            //'Content-Length: ' . strlen($val)
+            'Content-Length: ' . strlen($val)
         ],
         CURLOPT_POSTFIELDS => $val
     ]);

@@ -7,6 +7,7 @@ include 'vendor/autoload.php';
 
 if (strtolower($_SERVER['REQUEST_METHOD']) === 'post') {
     file_put_contents('endpoint.json', file_get_contents('php://input'));
+    die();
 }
 
 
@@ -22,5 +23,5 @@ if(file_exists('endpoint.json')){
         'authToken' => $content->keys->auth
     ]);
     $webpush = new \Minishlink\WebPush\WebPush();
-    $webpush->sendOneNotification($subscription,"Are You Ok");
+    $webpush->sendOneNotification($subscription,"Are You Ok now at ". date("Y/m/d H:i:s"));
 }

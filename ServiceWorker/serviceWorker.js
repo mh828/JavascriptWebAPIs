@@ -28,7 +28,7 @@ self.addEventListener('push', function (event) {
             }
         })
     })
-
+    console.log(event, 'message received');
     const textData = event.data.text();
-    self.registration.showNotification(textData);
+    self.registration.showNotification("Notification received : \t" + textData);
 });
