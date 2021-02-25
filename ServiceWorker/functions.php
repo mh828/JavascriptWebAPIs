@@ -9,8 +9,8 @@ function getKeys()
         return json_decode(file_get_contents($fileName));
     } else {
         $value = generateKeys();
-        file_put_contents($fileName,json_encode($value));
-        return  $value;
+        file_put_contents($fileName, json_encode($value));
+        return $value;
     }
 }
 
@@ -27,6 +27,15 @@ function generateKeys()
     $publicKey = $details['key'];
 
     return (object)['public_key' => $publicKey, 'private_key' => $pk];
+}
+
+function generateJWT($header, $body, $key)
+{
+    $payLoad = base64url_encode($header) . '.' .
+        base64url_encode($body);
+    return
+        $payLoad . '.'.
+        base64url_encode(mhash(MHASH_SHA256, $payLoad, $key));
 }
 
 /**
