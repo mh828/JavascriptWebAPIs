@@ -25,7 +25,7 @@ if (file_exists('endpoint.json')) {
             'Content-Encoding: aes128gcm',
             //'Content-Length: ' . strlen($val)
         ],
-        //CURLOPT_POSTFIELDS => $val
+        CURLOPT_POSTFIELDS => $val
     ]);
 
     $result = curl_exec($c);

@@ -6,16 +6,23 @@ if (file_exists('endpoint.json')) {
 
     //$salt = openssl_random_pseudo_bytes(16);
     $config = array(
-        "config" => __DIR__ . '/openssl.cnf'
+        "config" => __DIR__ . '/openssl.cnf',
+        "digest_alg" => "SHA256"
     );
+    $salt = openssl_random_pseudo_bytes(16);
+
     $privateKey = openssl_pkey_new($config);
     $details = openssl_pkey_get_details($privateKey);
     $pk = '';
     openssl_pkey_export($privateKey, $pk, null, $config);
     $publicKey = $details['key'];
 
+    $value = '';
+    openssl_private_encrypt("data to encrypt", $value, $privateKey);
+    echo base64_encode($value);
 
-    $pk = 'BH-03vhKF0zOCDogSUlIh_egzwRTdbybp3aqIqNKlQKFV-q8f5bCCecXvEzsDrDKeI1akgUY_84lPckYB8iazwQ';
-    var_dump(openssl_dh_compute_key(base64_decode($pk),$privateKey));
+    echo "<br /> <br /> <hr />";
+    openssl_public_decrypt($value, $value, $publicKey);
+    echo($value);
 
 }
