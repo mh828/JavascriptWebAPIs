@@ -1,46 +1,51 @@
-const configuration = {
-    iceServers: [
-        {urls: 'stun:stun.l.google.com:19302'}
-    ]
-};
+function makeConnection() {
+    const configuration = {
+        iceServers: [
+            {
+                urls: 'stun:127.0.0.1:3478'
+            }
+        ]
+    };
 
 
-const server = new RTCPeerConnection(configuration);
-const client = new RTCPeerConnection(configuration);
+    const server = new RTCPeerConnection(configuration);
+    const client = new RTCPeerConnection(configuration);
 
+    const channel = server.createDataChannel('chat');
 
-server.createOffer().then(serverOffer => {
-    return server.setLocalDescription(serverOffer);
-}).then(() => {
-    //send for remote client
-    client.setRemoteDescription(server.localDescription).then(() => {
-        client.createAnswer().then(clientAnswer => {
-            client.setLocalDescription(clientAnswer).then(() => {
-                server.setRemoteDescription(client.localDescription).then(() => {
-
-                })
-            });
-
+    server.addEventListener('icecandidate', e => {
+        client.addIceCandidate(e.candidate).then(r => {
+            console.log(r)
         })
     })
 
+    client.addEventListener('icecandidate', e => {
+        server.addIceCandidate(e.candidate).then(r => {
+            console.log(r)
+        })
+    })
 
-})
+    server.addEventListener('connectionstatechange', e => {
+        if (client.connectionState === 'connected')
+            console.log('connected')
+    })
 
-server.addEventListener('icecandidate', e => {
-    console.log(e)
-})
+    client.addEventListener('connectionstatechange', e => {
+        if (client.connectionState === 'connected')
+            console.log('connected')
+    })
 
-client.addEventListener('icecandidate', e => {
-    console.log(e)
-})
+    server.createOffer().then(serverOffer => server.setLocalDescription(serverOffer))
+        .then(() => client.setRemoteDescription(server.localDescription))
+        .then(() => client.createAnswer())
+        .then(answer => client.setLocalDescription(answer))
+        .then(() => server.setRemoteDescription(client.localDescription))
+        .then(() => {
+            console.log('all down', server.iceConnectionState, client.iceConnectionState)
+        })
+        .catch(() => {
+            console.error('crashed')
+        })
 
-server.addEventListener('connectionstatechange', e => {
-    if (client.connectionState === 'connected')
-        console.log('connected')
-})
 
-client.addEventListener('connectionstatechange', e => {
-    if (client.connectionState === 'connected')
-        console.log('connected')
-})
+}

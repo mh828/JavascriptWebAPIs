@@ -8,7 +8,7 @@
     <title>Document</title>
 </head>
 <body>
-
+<input type="button" onclick="makeConnection()" value="connect"/>
 
 <script src="scripts/signaling.js"></script>
 </body>
